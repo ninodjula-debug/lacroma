@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Contact — LACROMA</title>
+<style>
+:root{--bg:#FAF9F6;--ink:#1C1C1A;--muted:#77756F;--line:#E5E3DE}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+.page{max-width:1420px;margin:auto;padding:32px 48px 70px}
+header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:22px}
+.logo{font-size:25px;letter-spacing:.30em;font-weight:300}nav{display:flex;gap:27px;font-size:9px;letter-spacing:.14em}nav a{color:inherit;text-decoration:none}
+.intro{display:flex;justify-content:space-between;margin:42px 0 24px;font-size:9px;letter-spacing:.16em;color:var(--muted)}
+.hero{height:68vh;min-height:590px;display:flex;align-items:center;justify-content:center;padding:10px 5% 20px}
+.hero img{width:100%;height:100%;object-fit:contain;display:block}
+.caption{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:13px;font-size:9px;letter-spacing:.13em}
+.statement{font-family:Georgia,serif;font-size:25px;text-align:center;letter-spacing:.055em;margin:72px auto 84px}
+.works-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:19px}.works-head h2{font-size:11px;font-weight:400;letter-spacing:.19em;margin:0}.works-head span{font-size:9px;color:var(--muted);letter-spacing:.12em}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.thumb{position:relative;aspect-ratio:4/5;background:#fff;padding:14px;text-decoration:none;color:var(--muted);overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:contain;transition:transform .35s ease}.thumb:hover img{transform:scale(1.015)}.thumb span{position:absolute;bottom:7px;right:9px;font-size:8px;letter-spacing:.1em}
+.archive{margin-top:95px;border-top:1px solid var(--line);padding-top:26px;display:grid;grid-template-columns:1.3fr repeat(5,1fr);gap:20px;align-items:start}
+.archive .title{font-family:Georgia,serif;font-size:22px}.archive a{color:inherit;text-decoration:none;font-size:9px;letter-spacing:.14em}
+footer{margin-top:80px;border-top:1px solid var(--line);padding-top:18px;display:flex;justify-content:space-between;font-size:8px;letter-spacing:.13em;color:var(--muted)}
+.filters{display:flex;gap:28px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:15px 0;margin-bottom:22px}
+.filters button{appearance:none;border:0;background:transparent;padding:0;color:var(--muted);font:inherit;font-size:9px;letter-spacing:.15em;cursor:pointer}
+.filters button.active,.filters button:hover{color:var(--ink)}
+.thumb.hidden{display:none}
+
+.author-teaser{margin-top:105px;border-top:1px solid var(--line);padding:38px 0 72px;display:grid;grid-template-columns:1fr 2.1fr;gap:60px}
+.author-label{font-size:9px;letter-spacing:.17em;color:var(--muted);padding-top:7px}
+.author-copy p{font-family:Georgia,serif;font-size:25px;line-height:1.5;max-width:760px;margin:0 0 28px}
+.author-copy a{color:inherit;text-decoration:none;font-size:9px;letter-spacing:.15em}
+.destinations{border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr)}
+.destinations a{min-height:175px;padding:24px 24px 24px 0;border-right:1px solid var(--line);color:inherit;text-decoration:none;display:flex;flex-direction:column}
+.destinations a:nth-child(2),.destinations a:nth-child(3){padding-left:24px}
+.destinations a:last-child{border-right:0}
+.destinations span{font-size:8px;letter-spacing:.12em;color:var(--muted);margin-bottom:45px}
+.destinations strong{font-size:12px;letter-spacing:.17em;font-weight:400;margin-bottom:12px}
+.destinations em{font-family:Georgia,serif;font-size:14px;font-style:normal;color:var(--muted)}
+
+.contact-block{margin-top:82px;border-top:1px solid var(--line);padding:38px 0 54px;display:grid;grid-template-columns:1fr 2.1fr;gap:60px}
+.contact-label{font-size:9px;letter-spacing:.17em;color:var(--muted);padding-top:7px}
+.contact-copy p{font-family:Georgia,serif;font-size:22px;line-height:1.5;margin:0 0 26px}
+.contact-links{display:flex;gap:30px}.contact-links a{color:inherit;text-decoration:none;font-size:9px;letter-spacing:.15em}
+@media(max-width:850px){.page{padding:24px 18px}nav{display:none}.hero{height:60vh;min-height:420px;padding:0}.grid{grid-template-columns:repeat(2,1fr)}.archive{grid-template-columns:1fr 1fr}.author-teaser{grid-template-columns:1fr;gap:20px}.author-copy p{font-size:21px}.destinations{grid-template-columns:1fr}.contact-block{grid-template-columns:1fr;gap:18px}.destinations a,.destinations a:nth-child(2),.destinations a:nth-child(3){padding:22px 0;border-right:0;border-bottom:1px solid var(--line);min-height:135px}.archive .title{grid-column:1/-1}}
+</style><style>
+.works-more{display:none;text-align:center;margin:34px 0 0}
+.works-more button{border:0;background:none;color:var(--ink);font-size:9px;letter-spacing:.16em;cursor:pointer;padding:10px}
+.thumb.more-hidden{display:none}
+</style><style>
+.contact-page{min-height:68vh;display:grid;place-items:center;text-align:center}
+.contact-page .label{font-size:9px;letter-spacing:.18em;color:var(--muted);margin-bottom:25px}
+.contact-page h1{font-family:Georgia,serif;font-size:44px;font-weight:400;margin:0 0 28px}
+.contact-page a{color:var(--ink);text-decoration:none;font-size:10px;letter-spacing:.15em;border-bottom:1px solid var(--line);padding-bottom:7px}
+.contact-page .place{font-size:9px;letter-spacing:.15em;color:var(--muted);margin-top:42px}
+</style></head><body><div class="page"><header><div class="logo"><a href="index.html" style="color:inherit;text-decoration:none">LACROMA</a></div><nav><a href="index.html#works">WORKS</a><a href="exhibitions.html">EXHIBITIONS</a><a href="press.html">PRESS</a><a href="about.html">ABOUT</a><a href="contact.html" style="color:var(--ink)">CONTACT</a></nav></header>
+<section class="contact-page"><div><div class="label">CONTACT</div><h1>LACROMA</h1>
+<a href="https://www.instagram.com/lacroma/" target="_blank" rel="noopener">INSTAGRAM · @LACROMA →</a>
+<div class="place">DUBROVNIK · ZAGREB · CROATIA</div></div></section>
+<footer><span>© LACROMA</span><span>DUBROVNIK · ZAGREB · CROATIA</span></footer></div></body></html>
