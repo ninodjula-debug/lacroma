@@ -4,7 +4,7 @@ backend:
   branch: main
 
 media_folder: "media"
-public_folder: "/lacroma/media"
+public_folder: "/media"
 
 collections:
   - name: "works"
