@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LACROMA</title>
+
+  <style>
+    :root {
+      --bg: #FAF9F6;
+      --text: #1C1C1A;
+      --secondary: #77756F;
+      --line: #E5E3DE;
+      --frame: #FFFFFF;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 300;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    header {
+      width: 100%;
+      padding: 42px 5vw 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 300;
+      letter-spacing: 0.20em;
+    }
+
+    nav {
+      display: flex;
+      gap: 26px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+    }
+
+    nav a {
+      color: var(--secondary);
+    }
+
+    nav a:hover {
+      color: var(--text);
+    }
+
+    main {
+      width: 90%;
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    .intro {
+      min-height: 38vh;
+      display: flex;
+      align-items: flex-end;
+      padding: 80px 0 55px;
+    }
+
+    .intro p {
+      margin: 0;
+      max-width: 590px;
+      font-size: 19px;
+      line-height: 1.55;
+      font-weight: 300;
+    }
+
+    .categories {
+      display: flex;
+      gap: 34px;
+      padding: 24px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .gallery {
+      padding: 80px 0 120px;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: 1.55fr 1fr 1fr;
+      gap: 34px;
+      align-items: start;
+    }
+
+    .artwork {
+      background: var(--frame);
+      padding: 14px;
+      box-shadow:
+        0 1px 2px rgba(0,0,0,0.04),
+        0 8px 24px rgba(0,0,0,0.035);
+    }
+
+    .artwork img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .placeholder {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      background: #f2f1ed;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #aaa7a0;
+      font-size: 11px;
+      letter-spacing: .08em;
+    }
+
+    .artwork.large .placeholder {
+      aspect-ratio: 4 / 3;
+    }
+
+    .info {
+      padding: 110px 0;
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 60px;
+    }
+
+    .info h2 {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .info-content {
+      max-width: 650px;
+    }
+
+    .info-content p {
+      margin: 0 0 24px;
+      line-height: 1.65;
+      font-size: 16px;
+    }
+
+    .links {
+      margin-top: 50px;
+      display: grid;
+      gap: 14px;
+      font-size: 13px;
+    }
+
+    .links a {
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    footer {
+      width: 90%;
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 35px 0 50px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      color: var(--secondary);
+      font-size: 11px;
+      letter-spacing: .08em;
+    }
+
+    @media (max-width: 800px) {
+      header {
+        padding: 28px 6vw 22px;
+        display: block;
+      }
+
+      nav {
+        margin-top: 22px;
+        flex-wrap: wrap;
+        gap: 15px 22px;
+      }
+
+      main {
+        width: 88%;
+      }
+
+      .intro {
+        min-height: 30vh;
+        padding: 60px 0 40px;
+      }
+
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .categories {
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      .info {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+
+      footer {
+        width: 88%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <a class="logo" href="#">LACROMA</a>
+
+  <nav>
+    <a href="#work">Work</a>
+    <a href="#exhibitions">Exhibitions</a>
+    <a href="#press">Press</a>
+    <a href="#catalogues">Catalogues</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+
+  <section class="intro">
+    <p>
+      Drawings, observations and fragments.
+      Places, faces, notes and objects collected between
+      everyday life, travel and memory.
+    </p>
+  </section>
+
+  <section class="categories" id="work">
+    <a href="#">Places</a>
+    <a href="#">Faces</a>
+    <a href="#">Notes</a>
+    <a href="#">Objects</a>
+  </section>
+
+  <section class="gallery">
+    <div class="gallery-grid">
+
+      <div class="artwork large">
+        <div class="placeholder">LACROMA / IMAGE 01</div>
+      </div>
+
+      <div class="artwork">
+        <div class="placeholder">LACROMA / IMAGE 02</div>
+      </div>
+
+      <div class="artwork">
+        <div class="placeholder">LACROMA / IMAGE 03</div>
+      </div>
+
+      <div class="artwork">
+        <div class="placeholder">LACROMA / IMAGE 04</div>
+      </div>
+
+      <div class="artwork">
+        <div class="placeholder">LACROMA / IMAGE 05</div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="info" id="exhibitions">
+    <h2>Exhibitions</h2>
+    <div class="info-content">
+      <p>Selected exhibitions and projects.</p>
+    </div>
+  </section>
+
+  <section class="info" id="press">
+    <h2>Press</h2>
+    <div class="info-content">
+      <p>Selected articles, reviews and conversations.</p>
+    </div>
+  </section>
+
+  <section class="info" id="catalogues">
+    <h2>Catalogues</h2>
+    <div class="info-content">
+      <p>Exhibition catalogues and publications.</p>
+    </div>
+  </section>
+
+  <section class="info" id="contact">
+    <h2>Contact</h2>
+
+    <div class="info-content">
+      <p>
+        LACROMA is an evolving visual archive of drawings,
+        observations and encounters.
+      </p>
+
+      <div class="links">
+        <a href="#">Instagram</a>
+        <a href="mailto:">Email</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>LACROMA</span>
+  <span>© 2026</span>
+</footer>
+
+</body>
+</html>
