@@ -31,7 +31,7 @@ collections:
     summary: "{{order}} · {{title}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
-      - { label: "Existing item title", name: "legacy_title", widget: "string", required: false, hint: "Internal link to an exhibition already present on the locked site." }
+      - { label: "Internal existing-item key", name: "legacy_title", widget: "hidden", required: false }
       - { label: "Hide from site", name: "hidden", widget: "boolean", default: false, required: false }
       - { label: "Year", name: "year", widget: "string", required: false }
       - { label: "Venue / Location", name: "venue", widget: "string", required: false }
@@ -49,7 +49,7 @@ collections:
     summary: "{{order}} · {{title}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
-      - { label: "Existing item title", name: "legacy_title", widget: "string", required: false, hint: "Internal link to a Press item already present on the locked site." }
+      - { label: "Internal existing-item key", name: "legacy_title", widget: "hidden", required: false }
       - { label: "Hide from site", name: "hidden", widget: "boolean", default: false, required: false }
       - { label: "Publication", name: "publication", widget: "string", required: false }
       - { label: "Date / Year", name: "date", widget: "string", required: false }
@@ -64,18 +64,18 @@ collections:
     folder: "data/homepage"
     create: true
     slug: "{{slug}}"
-    summary: "{{order}} · {{title}}"
+    summary: "{{order}} · {{category}}"
     fields:
-      - { label: "Title", name: "title", widget: "string", required: false }
-      - { label: "Image", name: "image", widget: "image", required: false, hint: "Existing homepage images can be reordered or hidden without replacing the image." }
-      - { label: "Existing homepage position", name: "legacy_index", widget: "number", value_type: "int", required: false, hint: "Internal field for images already present on the locked homepage." }
+      - { label: "Image", name: "image", widget: "image", hint: "Choose the artwork shown on the homepage." }
+      - { label: "Order", name: "order", widget: "number", value_type: "int", required: false, hint: "Smaller number appears earlier. Use 10, 20, 30..." }
       - { label: "Hide from homepage", name: "hidden", widget: "boolean", default: false, required: false }
-      - { label: "Order", name: "order", widget: "number", value_type: "int", required: false, hint: "Smaller number appears earlier on the homepage." }
       - label: "Category"
         name: "category"
         widget: "select"
         required: false
         options: ["Places", "Faces", "Notes", "Objects"]
+      - { label: "Title / alt text", name: "title", widget: "string", required: false, hint: "Optional." }
+      - { label: "Internal homepage position", name: "legacy_index", widget: "hidden", required: false }
 
   - name: "site"
     label: "Site"
