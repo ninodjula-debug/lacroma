@@ -1,0 +1,1 @@
+LACROMA CMS migration stage: existing Press and Exhibitions entries are being moved under CMS control without changing the locked visual design. This file is ignored by the site build and can be removed after migration.
