@@ -71,7 +71,7 @@ if (!fs.existsSync(indexFile)) {
 let html = fs.readFileSync(indexFile, "utf8");
 
 const gridRegex =
-  /<section class=["']grid["']>([\s\S]*?)<\/section>(?=\s*<section class=["']author-teaser["']>)/i;
+  /<section class=["']grid["']>([\s\S]*?)<\/section>/i;
 
 const match = html.match(gridRegex);
 
