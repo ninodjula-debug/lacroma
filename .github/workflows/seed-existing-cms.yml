@@ -1,12 +1,10 @@
 name: Seed existing CMS content
 on:
-  push:
-    branches: [cms-full-existing-content]
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
   seed:
-    if: "!contains(github.event.head_commit.message, '[skip seed]')"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
