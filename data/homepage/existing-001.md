@@ -1,6 +1,6 @@
 ---
-title: Original LACROMA work
+title: "Original LACROMA work"
 legacy_index: 1
-order: 5
-category: Faces
+order: 10
+category: "Faces"
 ---
