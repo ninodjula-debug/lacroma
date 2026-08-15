@@ -1,7 +1,7 @@
 backend:
   name: git-gateway
   repo: ninodjula-debug/lacroma
-  branch: cms-full-existing-content
+  branch: cms-complete-content
 
 media_folder: "media"
 public_folder: "/media"

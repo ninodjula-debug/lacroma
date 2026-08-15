@@ -1,0 +1,25 @@
+name: CMS content consistency
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build site from CMS content
+        run: node build.js
+      - name: Verify CMS collections exist
+        run: |
+          test -d data/homepage
+          test -d data/works
+          test -d data/exhibitions
+          test -d data/press
+          test $(find data/homepage -maxdepth 1 -name '*.md' | wc -l) -ge 11
