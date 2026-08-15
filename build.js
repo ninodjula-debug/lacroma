@@ -3,18 +3,32 @@ const path = require("path");
 
 const worksDir = path.join(__dirname, "data", "works");
 const outputFile = path.join(__dirname, "works.json");
+const indexFile = path.join(__dirname, "index.html");
 
 function clean(value = "") {
   return value.trim().replace(/^["']|["']$/g, "");
 }
 
+function escapeHtml(value = "") {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 const works = [];
 
 if (fs.existsSync(worksDir)) {
-  const files = fs.readdirSync(worksDir).filter(file => file.endsWith(".md"));
+  const files = fs
+    .readdirSync(worksDir)
+    .filter(file => file.endsWith(".md"));
 
   for (const file of files) {
-    const text = fs.readFileSync(path.join(worksDir, file), "utf8");
+    const text = fs.readFileSync(
+      path.join(worksDir, file),
+      "utf8"
+    );
 
     const work = {};
 
@@ -25,7 +39,9 @@ if (fs.existsSync(worksDir)) {
       const key = match[1];
       const value = clean(match[2]);
 
-      if (["title", "image", "category", "year", "location"].includes(key)) {
+      if (
+        ["title", "image", "category", "year", "location"].includes(key)
+      ) {
         work[key] = value;
       }
     }
@@ -36,6 +52,63 @@ if (fs.existsSync(worksDir)) {
   }
 }
 
-fs.writeFileSync(outputFile, JSON.stringify(works, null, 2), "utf8");
+/* Generate works.json */
+fs.writeFileSync(
+  outputFile,
+  JSON.stringify(works, null, 2),
+  "utf8"
+);
 
-console.log(`LACROMA: generated ${works.length} works → works.json`);
+console.log(
+  `LACROMA: generated ${works.length} works → works.json`
+);
+
+/* Add CMS works to the existing locked LACROMA gallery */
+if (!fs.existsSync(indexFile)) {
+  throw new Error("LACROMA: index.html not found");
+}
+
+let html = fs.readFileSync(indexFile, "utf8");
+
+const gridRegex =
+  /<section class=["']grid["']>([\s\S]*?)<\/section>(?=\s*<section class=["']author-teaser["']>)/i;
+
+const match = html.match(gridRegex);
+
+if (!match) {
+  throw new Error(
+    "LACROMA: gallery grid not found — index.html left unchanged"
+  );
+}
+
+const existingGrid = match[1];
+
+const newWorks = works.filter(
+  work => !existingGrid.includes(work.image)
+);
+
+const cmsMarkup = newWorks
+  .map(work => {
+    const title = escapeHtml(work.title || "LACROMA artwork");
+    const image = escapeHtml(work.image);
+    const category = escapeHtml(
+      (work.category || "").toLowerCase()
+    );
+
+    return `<a class="thumb" data-cat="${category}" href="#"><img alt="${title}" src="${image}" loading="lazy"></a>`;
+  })
+  .join("");
+
+const updatedGrid =
+  `<section class="grid">` +
+  existingGrid +
+  cmsMarkup +
+  `</section>`;
+
+html = html.replace(gridRegex, updatedGrid);
+
+fs.writeFileSync(indexFile, html, "utf8");
+
+console.log(
+  `LACROMA: added ${newWorks.length} CMS works to gallery`
+);
