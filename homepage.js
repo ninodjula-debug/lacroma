@@ -21,6 +21,32 @@ const managed=[];for(const [idx,it] of [...byLegacy.entries()].sort((a,b)=>a[0]-
 for(const i of unused)managed.push({order:(i+1)*10,markup:legacy[i]});
 const added=fresh.map((it,i)=>({order:Number(it.order||((legacy.length+i+1)*10)),markup:`<a class="thumb" data-homepage-cms="1" data-cat="${esc((it.category||'').toLowerCase())}" href="${esc(it.image)}"><img alt="${esc(it.title||'LACROMA artwork')}" src="${esc(it.image)}" loading="lazy"></a>`}));
 const rebuilt=[...managed,...added].sort((a,b)=>a.order-b.order).map(x=>x.markup).join('');html=html.replace(gridRe,`<section class="grid">${rebuilt}</section>`);
-/* Gallery pagination: Home and every category show up to 16 works before MORE appears. */
-html=html.replace(/let\s+initialShown\s*=\s*\d+\s*;/g,'let initialShown = 16;').replace(/const\s+initialShown\s*=\s*\d+\s*;/g,'const initialShown = 16;');
-fs.writeFileSync(file,html,'utf8');console.log(`LACROMA: managed ${managed.length} existing + ${added.length} homepage CMS images; first 16 works visible before MORE`);
+/* Keep gallery pagination isolated here: 16 visible works on Home and 16 within the active category, then MORE. */
+const oldGalleryLogic=/const buttons=\[\.\.\.document\.querySelectorAll\('\.filters button'\)\];[\s\S]*?moreBtn\.addEventListener\('click',\(\)=>\{cards\.forEach\(c=>c\.classList\.remove\('more-hidden'\)\);moreWrap\.style\.display='none';\}\);\s*\}/;
+const newGalleryLogic=`const buttons=[...document.querySelectorAll('.filters button')];
+const cards=[...document.querySelectorAll('.thumb')];
+const moreWrap=document.getElementById('worksMore');
+const moreBtn=moreWrap?moreWrap.querySelector('button'):null;
+const LIMIT=16;
+let active='all',expanded=false;
+function renderWorks(){
+  const eligible=cards.filter(card=>active==='all'||card.dataset.cat===active);
+  cards.forEach(card=>{
+    card.classList.toggle('hidden',active!=='all'&&card.dataset.cat!==active);
+    card.classList.remove('more-hidden');
+  });
+  if(!expanded)eligible.slice(LIMIT).forEach(card=>card.classList.add('more-hidden'));
+  if(moreWrap)moreWrap.style.display=eligible.length>LIMIT&&!expanded?'block':'none';
+}
+buttons.forEach(btn=>btn.addEventListener('click',()=>{
+  buttons.forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  active=btn.dataset.filter||'all';
+  expanded=false;
+  renderWorks();
+}));
+if(moreBtn)moreBtn.addEventListener('click',()=>{expanded=true;renderWorks();});
+renderWorks();`;
+if(!oldGalleryLogic.test(html))throw new Error('LACROMA homepage helper: expected gallery pagination block not found — index.html left unchanged');
+html=html.replace(oldGalleryLogic,newGalleryLogic);
+fs.writeFileSync(file,html,'utf8');console.log(`LACROMA: managed ${managed.length} existing + ${added.length} homepage CMS images; 16 works visible per active view before MORE`);
