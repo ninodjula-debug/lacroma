@@ -1,0 +1,2 @@
+[build]
+command = "node build.js && node homepage.js"
