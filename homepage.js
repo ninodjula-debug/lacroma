@@ -20,4 +20,23 @@ const managed=[];for(const [idx,it] of [...byLegacy.entries()].sort((a,b)=>a[0]-
 /* Preserve any unmanaged locked thumbnails as a safety fallback. */
 for(const i of unused)managed.push({order:(i+1)*10,markup:legacy[i]});
 const added=fresh.map((it,i)=>({order:Number(it.order||((legacy.length+i+1)*10)),markup:`<a class="thumb" data-homepage-cms="1" data-cat="${esc((it.category||'').toLowerCase())}" href="${esc(it.image)}"><img alt="${esc(it.title||'LACROMA artwork')}" src="${esc(it.image)}" loading="lazy"></a>`}));
-const rebuilt=[...managed,...added].sort((a,b)=>a.order-b.order).map(x=>x.markup).join('');html=html.replace(gridRe,`<section class="grid">${rebuilt}</section>`);fs.writeFileSync(file,html,'utf8');console.log(`LACROMA: managed ${managed.length} existing + ${added.length} homepage CMS images`);
+const rebuilt=[...managed,...added].sort((a,b)=>a.order-b.order).map(x=>x.markup).join('');html=html.replace(gridRe,`<section class="grid">${rebuilt}</section>`);
+/* Keep gallery pagination in sync with CMS additions: show 16 items in the active view, then More. */
+const paginationRe=/const moreWrap=document\.getElementById\('worksMore'\);[\s\S]*?(?=<\/script>)/i;
+const pagination=`const moreWrap=document.getElementById('worksMore');
+const moreBtn=moreWrap?moreWrap.querySelector('button'):null;
+const PAGE_SIZE=16;
+let moreExpanded=false;
+function renderWorks(){
+  const activeBtn=buttons.find(b=>b.classList.contains('active'));
+  const f=activeBtn?activeBtn.dataset.filter:'all';
+  const eligible=cards.filter(card=>f==='all'||card.dataset.cat===f);
+  cards.forEach(card=>{const matches=f==='all'||card.dataset.cat===f;const pos=eligible.indexOf(card);card.classList.toggle('hidden',!matches);card.classList.toggle('more-hidden',matches&&!moreExpanded&&pos>=PAGE_SIZE);});
+  if(moreWrap)moreWrap.style.display=eligible.length>PAGE_SIZE&&!moreExpanded?'block':'none';
+}
+buttons.forEach(btn=>btn.addEventListener('click',()=>{moreExpanded=false;renderWorks();}));
+if(moreBtn)moreBtn.addEventListener('click',()=>{moreExpanded=true;renderWorks();});
+renderWorks();
+`;
+if(!paginationRe.test(html))throw new Error('LACROMA homepage helper: gallery pagination block not found');
+html=html.replace(paginationRe,pagination);fs.writeFileSync(file,html,'utf8');console.log(`LACROMA: managed ${managed.length} existing + ${added.length} homepage CMS images; gallery page size 16`);
