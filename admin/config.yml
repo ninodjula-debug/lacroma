@@ -21,3 +21,4 @@ collections:
         options: ["Places", "Faces", "Notes", "Objects"]
       - { label: "Year", name: "year", widget: "string", required: false }
       - { label: "Location", name: "location", widget: "string", required: false }
+      - { label: "Order", name: "order", widget: "number", value_type: "int", required: false }
