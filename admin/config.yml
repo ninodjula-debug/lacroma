@@ -30,6 +30,7 @@ collections:
     slug: "{{slug}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
+      - { label: "Existing item title", name: "legacy_title", widget: "string", required: false, hint: "Used only while migrating an exhibition already present on the locked site." }
       - { label: "Year", name: "year", widget: "string", required: false }
       - { label: "Venue / Location", name: "venue", widget: "string", required: false }
       - { label: "Description", name: "description", widget: "text", required: false }
@@ -45,6 +46,7 @@ collections:
     slug: "{{slug}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
+      - { label: "Existing item title", name: "legacy_title", widget: "string", required: false, hint: "Used only while migrating a press item already present on the locked site." }
       - { label: "Publication", name: "publication", widget: "string", required: false }
       - { label: "Date / Year", name: "date", widget: "string", required: false }
       - { label: "Description", name: "description", widget: "text", required: false }
