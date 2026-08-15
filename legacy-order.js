@@ -8,6 +8,7 @@ function esc(s=''){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;')
 function attr(s=''){return esc(s).replace(/'/g,'&#39;');}
 
 // PRESS: every existing item can be hidden and reordered. The first visible item occupies the locked featured design slot.
+// Important: small cards are removed/inserted one by one; we never replace the whole nested .more-press container.
 if(fs.existsSync('press.html')){
  let h=fs.readFileSync('press.html','utf8'),items=collection('data/press'),byTitle=new Map(items.map(x=>[x.title,x]));
  const blockRe=/<a\b[^>]*class=["'][^"']*press-(?:feature|small)[^"']*["'][^>]*>[\s\S]*?<\/a>/gi;
@@ -15,11 +16,16 @@ if(fs.existsSync('press.html')){
  const details=b=>{const title=text((b.match(/<h[23][^>]*>([\s\S]*?)<\/h[23]>/i)||[])[1]||'');return{block:b,title,item:byTitle.get(title),href:(b.match(/\bhref=["']([^"']*)["']/i)||[])[1]||'#',meta:text((b.match(/<div\b[^>]*class=["'][^"']*meta[^"']*["'][^>]*>([\s\S]*?)<\/div>/i)||[])[1]||''),desc:text((b.match(/<p[^>]*>([\s\S]*?)<\/p>/i)||[])[1]||''),img:(b.match(/<img\b[^>]*\bsrc=["']([^"']*)["']/i)||[])[1]||'',feature:/\bpress-feature\b/i.test(b)};};
  const ranked=blocks.map((b,i)=>{const d=details(b),it=d.item;return{...d,order:Number((it&&it.order)||((i+1)*10)),hidden:!!(it&&truthy(it.hidden))};}).filter(x=>!x.hidden).sort((a,b)=>a.order-b.order);
  const featureWrap=/(<section class=["']featured-press["']>)[\s\S]*?(<\/section>)/i;
- const moreWrap=/(<div class=["']more-press["']>)[\s\S]*?(<\/div>\s*(?:<\/section>)?)/i;
  const asFeature=(d,n)=>{if(d.feature)return d.block.replace(/(<div class=["']num["']>)[\s\S]*?(<\/div>)/i,`$1${String(n).padStart(2,'0')}$2`);const it=d.item||{};const desc=it.description||d.desc||'';const image=it.image||d.img||'';const meta=it.publication||d.meta||'';return `<a class="press-feature" href="${attr(it.link||it.pdf||d.href||'#')}" target="_blank" rel="noopener"><div class="num">${String(n).padStart(2,'0')}</div><div><h2>${esc(it.title||d.title||'Press')}</h2>${desc?`<p>${esc(desc)}</p>`:''}</div>${image?`<div class="photo"><img src="${attr(image)}" alt="${attr(it.title||d.title||'Press')}"></div>`:'<div class="photo"></div>'}<div class="meta">${esc(meta)}</div></a>`;};
  const asSmall=d=>{if(!d.feature)return d.block;const it=d.item||{};const meta=it.publication||d.meta||'';return `<a class="press-small" href="${attr(it.link||it.pdf||d.href||'#')}" target="_blank" rel="noopener"><div class="meta">${esc(meta)}</div><h3>${esc(it.title||d.title||'Press')}</h3><span>VIEW →</span></a>`;};
- if(ranked.length){h=h.replace(featureWrap,`$1${asFeature(ranked[0],1)}$2`);const rest=ranked.slice(1).map(asSmall).join('');h=h.replace(moreWrap,`$1${rest}$2`);}else{h=h.replace(featureWrap,'$1$2');h=h.replace(moreWrap,'$1$2');}
- fs.writeFileSync('press.html',h,'utf8');console.log('LACROMA: applied full Press hide/order controls');
+ // Replace only the featured section content.
+ if(ranked.length) h=h.replace(featureWrap,`$1${asFeature(ranked[0],1)}$2`); else h=h.replace(featureWrap,'$1$2');
+ // Remove the original small cards individually. This preserves the .more-press wrapper and everything after it.
+ for(const d of blocks.map(details).filter(x=>!x.feature)) h=h.replace(d.block,'');
+ // Insert the reordered remaining cards immediately after the .more-press opening tag.
+ const rest=ranked.slice(1).map(asSmall).join('');
+ h=h.replace(/(<div class=["']more-press["']>)/i,`$1${rest}`);
+ fs.writeFileSync('press.html',h,'utf8');console.log('LACROMA: applied full Press hide/order controls safely');
 }
 
 // EXHIBITIONS: hide and reorder all existing exhibition sections.
