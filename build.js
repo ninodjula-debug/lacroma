@@ -40,8 +40,7 @@ if (fs.existsSync(worksDir)) {
       const value = clean(match[2]);
 
       if (
-        ["title", "image", "category", "year", "location"].includes(key)
-      ) {
+["title", "image", "category", "year", "location", "order"].includes(key)      ) {
         work[key] = value;
       }
     }
@@ -53,6 +52,11 @@ if (fs.existsSync(worksDir)) {
 }
 
 /* Generate works.json */
+works.sort((a, b) => {
+  const orderA = Number(a.order ?? 999999);
+  const orderB = Number(b.order ?? 999999);
+  return orderA - orderB;
+});
 fs.writeFileSync(
   outputFile,
   JSON.stringify(works, null, 2),
