@@ -14,11 +14,14 @@ collections:
     slug: "{{slug}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
-      - { label: "Image", name: "image", widget: "image" }
+      - { label: "Image", name: "image", widget: "image", required: false, hint: "For an existing locked-gallery work, leave this empty until you want to replace its image." }
       - label: "Category"
         name: "category"
         widget: "select"
         options: ["Places", "Faces", "Notes", "Objects"]
+        required: false
+      - { label: "Existing gallery position", name: "legacy_index", widget: "number", value_type: "int", required: false, hint: "Internal migration field for works already present on the locked site." }
+      - { label: "Hide from gallery", name: "hidden", widget: "boolean", default: false, required: false }
       - { label: "Year", name: "year", widget: "string", required: false }
       - { label: "Location", name: "location", widget: "string", required: false }
       - { label: "Order", name: "order", widget: "number", value_type: "int", required: false }
