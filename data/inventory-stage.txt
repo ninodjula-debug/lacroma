@@ -1,0 +1,1 @@
+Temporary inventory stage for complete CMS migration. No visual changes intended.
