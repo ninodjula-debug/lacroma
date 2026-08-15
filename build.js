@@ -32,17 +32,20 @@ function escapeAttr(value = "") {
   return escapeHtml(value).replace(/'/g, "&#39;");
 }
 
+function renderInline(value = "") {
+  return escapeHtml(value).replace(/\*([^*]+)\*/g, "<em>$1</em>");
+}
+
 function parseYamlLike(text = "") {
   const out = {};
   const lines = text.replace(/\r/g, "").split("\n");
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const match = line.match(/^([A-Za-z_][A-Za-z0-9_]*):\s*(.*)$/);
+    const match = lines[i].match(/^([A-Za-z_][A-Za-z0-9_]*):\s*(.*)$/);
     if (!match) continue;
 
     const key = match[1];
-    let raw = match[2];
+    const raw = match[2];
 
     if (/^[>|][-+]?\s*$/.test(raw)) {
       const block = [];
@@ -130,10 +133,7 @@ if (home.home_text) {
 
 const gridRegex = /<section class=["']grid["']>([\s\S]*?)<\/section>/i;
 const gridMatch = html.match(gridRegex);
-
-if (!gridMatch) {
-  throw new Error("LACROMA: gallery grid not found — index.html left unchanged");
-}
+if (!gridMatch) throw new Error("LACROMA: gallery grid not found — index.html left unchanged");
 
 const existingGrid = gridMatch[1];
 const cmsMarkup = works
@@ -146,52 +146,24 @@ const cmsMarkup = works
   })
   .join("");
 
-html = html.replace(
-  gridRegex,
-  `<section class="grid">${existingGrid}${cmsMarkup}</section>`
-);
+html = html.replace(gridRegex, `<section class="grid">${existingGrid}${cmsMarkup}</section>`);
 
 const galleryEnhancement = `
 <style data-lacroma-cms-package>
-  .caption{display:none!important}
-  .thumb span{display:none!important}
-  .thumb{cursor:zoom-in}
-  .lacroma-lightbox{position:fixed;inset:0;z-index:9999;background:rgba(250,249,246,.97);display:none;align-items:center;justify-content:center;padding:28px}
-  .lacroma-lightbox.open{display:flex}
-  .lacroma-lightbox img{max-width:94vw;max-height:90vh;width:auto;height:auto;object-fit:contain}
-  .lacroma-lightbox button{position:fixed;top:24px;right:28px;border:0;background:transparent;color:#1C1C1A;font:300 28px/1 Arial,sans-serif;cursor:pointer;padding:8px}
-  @media(max-width:850px){.lacroma-lightbox{padding:16px}.lacroma-lightbox button{top:12px;right:12px}}
+.caption{display:none!important}.thumb span{display:none!important}.thumb{cursor:zoom-in}
+.lacroma-lightbox{position:fixed;inset:0;z-index:9999;background:rgba(250,249,246,.97);display:none;align-items:center;justify-content:center;padding:28px}
+.lacroma-lightbox.open{display:flex}.lacroma-lightbox img{max-width:94vw;max-height:90vh;width:auto;height:auto;object-fit:contain}
+.lacroma-lightbox button{position:fixed;top:24px;right:28px;border:0;background:transparent;color:#1C1C1A;font:300 28px/1 Arial,sans-serif;cursor:pointer;padding:8px}
+@media(max-width:850px){.lacroma-lightbox{padding:16px}.lacroma-lightbox button{top:12px;right:12px}}
 </style>
-<div class="lacroma-lightbox" id="lacroma-lightbox" aria-hidden="true">
-  <button type="button" aria-label="Close">×</button>
-  <img alt="">
-</div>
+<div class="lacroma-lightbox" id="lacroma-lightbox" aria-hidden="true"><button type="button" aria-label="Close">×</button><img alt=""></div>
 <script data-lacroma-cms-package>
 (() => {
-  const box = document.getElementById('lacroma-lightbox');
-  if (!box) return;
-  const image = box.querySelector('img');
-  const close = () => {
-    box.classList.remove('open');
-    box.setAttribute('aria-hidden','true');
-    image.removeAttribute('src');
-    document.body.style.overflow = '';
-  };
-  document.querySelectorAll('.thumb').forEach(thumb => {
-    thumb.addEventListener('click', event => {
-      const source = thumb.querySelector('img');
-      if (!source || !source.src) return;
-      event.preventDefault();
-      image.src = source.src;
-      image.alt = source.alt || '';
-      box.classList.add('open');
-      box.setAttribute('aria-hidden','false');
-      document.body.style.overflow = 'hidden';
-    });
-  });
-  box.addEventListener('click', event => { if (event.target === box) close(); });
-  box.querySelector('button').addEventListener('click', close);
-  document.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
+  const box=document.getElementById('lacroma-lightbox'); if(!box)return;
+  const image=box.querySelector('img');
+  const close=()=>{box.classList.remove('open');box.setAttribute('aria-hidden','true');image.removeAttribute('src');document.body.style.overflow='';};
+  document.querySelectorAll('.thumb').forEach(thumb=>thumb.addEventListener('click',event=>{const source=thumb.querySelector('img');if(!source||!source.src)return;event.preventDefault();image.src=source.src;image.alt=source.alt||'';box.classList.add('open');box.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';}));
+  box.addEventListener('click',event=>{if(event.target===box)close();}); box.querySelector('button').addEventListener('click',close); document.addEventListener('keydown',event=>{if(event.key==='Escape')close();});
 })();
 </script>`;
 
@@ -203,49 +175,29 @@ if (fs.existsSync(aboutFile)) {
   let aboutHtml = fs.readFileSync(aboutFile, "utf8");
   const about = readYamlLike(aboutDataFile);
 
-  if (about.name) {
-    aboutHtml = aboutHtml.replace(
-      /(<div class=["']about-kicker["']>ABOUT<\/div>\s*<h1>)[\s\S]*?(<\/h1>)/i,
-      `$1${escapeHtml(about.name)}$2`
-    );
-  }
+  const completeCopy = [about.intro, about.drawing, about.quote, about.practice, about.exhibitions_text].every(Boolean);
+  if (completeCopy) {
+    const copyMarkup = `<div class="about-copy">
+<div class="about-kicker">ABOUT</div><h1>${escapeHtml(about.name || "Nino Đula")}</h1>
+<p>${renderInline(about.intro)}</p>
+<p>${renderInline(about.drawing)}</p>
+<p class="about-quote">${renderInline(about.quote)}</p>
+<p>${renderInline(about.practice)}</p>
+<p>${renderInline(about.exhibitions_text)}</p>
+<div class="about-location">${escapeHtml(about.location || "")}</div></div>`;
 
-  if (about.quote) {
     aboutHtml = aboutHtml.replace(
-      /(<p class=["']about-quote["']>)[\s\S]*?(<\/p>)/i,
-      `$1${escapeHtml(about.quote)}$2`
+      /<div class=["']about-copy["']>[\s\S]*?<div class=["']about-location["']>[\s\S]*?<\/div><\/div>/i,
+      copyMarkup
     );
+  } else {
+    if (about.name) aboutHtml = aboutHtml.replace(/(<div class=["']about-kicker["']>ABOUT<\/div>\s*<h1>)[\s\S]*?(<\/h1>)/i, `$1${escapeHtml(about.name)}$2`);
+    if (about.quote) aboutHtml = aboutHtml.replace(/(<p class=["']about-quote["']>)[\s\S]*?(<\/p>)/i, `$1${renderInline(about.quote)}$2`);
+    if (about.location) aboutHtml = aboutHtml.replace(/(<div class=["']about-location["']>)[\s\S]*?(<\/div>)/i, `$1${escapeHtml(about.location)}$2`);
   }
 
   if (about.photo) {
-    aboutHtml = aboutHtml.replace(
-      /(<div class=["']about-photo["']>\s*<img\b[^>]*\bsrc=["'])[^"']*(["'][^>]*>)/i,
-      `$1${escapeAttr(about.photo)}$2`
-    );
-  }
-
-  if (about.location) {
-    aboutHtml = aboutHtml.replace(
-      /(<div class=["']about-location["']>)[\s\S]*?(<\/div>)/i,
-      `$1${escapeHtml(about.location)}$2`
-    );
-  }
-
-  if (about.text) {
-    const paragraphs = about.text
-      .split(/\n\s*\n/)
-      .map(p => p.trim())
-      .filter(Boolean)
-      .map(p => `<p>${escapeHtml(p)}</p>`)
-      .join("\n");
-
-    aboutHtml = aboutHtml.replace(
-      /(<div class=["']about-kicker["']>ABOUT<\/div><h1>[\s\S]*?<\/h1>)([\s\S]*?)(<p class=["']about-quote["'])/i,
-      (match, head, middle, quoteStart) => {
-        const cleaned = middle.replace(/<p>[\s\S]*?<\/p>\s*/gi, "");
-        return `${head}\n${paragraphs}\n${cleaned}${quoteStart}`;
-      }
-    );
+    aboutHtml = aboutHtml.replace(/(<div class=["']about-photo["']>\s*<img\b[^>]*\bsrc=["'])[^"']*(["'][^>]*>)/i, `$1${escapeAttr(about.photo)}$2`);
   }
 
   saveHtml(aboutFile, aboutHtml, "about.html");
@@ -256,37 +208,14 @@ if (fs.existsSync(contactFile)) {
   let contactHtml = fs.readFileSync(contactFile, "utf8");
   const contact = readYamlLike(contactDataFile);
 
-  if (contact.heading) {
-    contactHtml = contactHtml.replace(
-      /(<section class=["']contact-page["'][^>]*>[\s\S]*?<h1>)[\s\S]*?(<\/h1>)/i,
-      `$1${escapeHtml(contact.heading)}$2`
-    );
-  }
-
+  if (contact.heading) contactHtml = contactHtml.replace(/(<section class=["']contact-page["'][^>]*>[\s\S]*?<h1>)[\s\S]*?(<\/h1>)/i, `$1${escapeHtml(contact.heading)}$2`);
   if (contact.instagram_url || contact.instagram_label) {
-    contactHtml = contactHtml.replace(
-      /<a href=["'][^"']*["'] target=["']_blank["'] rel=["']noopener["']>[\s\S]*?<\/a>/i,
-      `<a href="${escapeAttr(contact.instagram_url || "https://www.instagram.com/lacroma/")}" target="_blank" rel="noopener">${escapeHtml(contact.instagram_label || "INSTAGRAM · @LACROMA →")}</a>`
-    );
+    contactHtml = contactHtml.replace(/<a href=["'][^"']*["'] target=["']_blank["'] rel=["']noopener["']>[\s\S]*?<\/a>/i, `<a href="${escapeAttr(contact.instagram_url || "https://www.instagram.com/lacroma/")}" target="_blank" rel="noopener">${escapeHtml(contact.instagram_label || "INSTAGRAM · @LACROMA →")}</a>`);
   }
-
-  if (contact.email) {
-    const emailMarkup = `<br><a href="mailto:${escapeAttr(contact.email)}">${escapeHtml(contact.email)}</a>`;
-    if (!contactHtml.includes(`mailto:${contact.email}`)) {
-      contactHtml = contactHtml.replace(
-        /(<a href=["']https:\/\/www\.instagram\.com\/lacroma\/?["'][\s\S]*?<\/a>)/i,
-        `$1${emailMarkup}`
-      );
-    }
+  if (contact.email && !contactHtml.includes(`mailto:${contact.email}`)) {
+    contactHtml = contactHtml.replace(/(<a href=["']https:\/\/www\.instagram\.com\/lacroma\/?["'][\s\S]*?<\/a>)/i, `$1<br><a href="mailto:${escapeAttr(contact.email)}">${escapeHtml(contact.email)}</a>`);
   }
-
-  if (contact.location) {
-    contactHtml = contactHtml.replace(
-      /(<div class=["']place["']>)[\s\S]*?(<\/div>)/i,
-      `$1${escapeHtml(contact.location)}$2`
-    );
-  }
-
+  if (contact.location) contactHtml = contactHtml.replace(/(<div class=["']place["']>)[\s\S]*?(<\/div>)/i, `$1${escapeHtml(contact.location)}$2`);
   saveHtml(contactFile, contactHtml, "contact.html");
 }
 
@@ -303,17 +232,12 @@ if (fs.existsSync(pressFile)) {
       const description = item.description ? `<span>${escapeHtml(item.description)}</span>` : `<span>VIEW →</span>`;
       return `<a class="press-small" data-cms-press="1" href="${href}" target="_blank" rel="noopener"><div class="meta">${meta}</div><h3>${title}</h3>${description}</a>`;
     }).join("");
-
-    pressHtml = pressHtml.replace(
-      /(<div class=["']more-press["']>)([\s\S]*?)(<\/div>\s*(?:<\/section>)?)/i,
-      (match, start, middle, end) => `${start}${middle}${pressMarkup}${end}`
-    );
+    pressHtml = pressHtml.replace(/(<div class=["']more-press["']>)([\s\S]*?)(<\/div>\s*(?:<\/section>)?)/i, (match,start,middle,end)=>`${start}${middle}${pressMarkup}${end}`);
   }
-
   saveHtml(pressFile, pressHtml, "press.html");
 }
 
-/* EXHIBITIONS: CMS entries are added before footer in a design-neutral list. */
+/* EXHIBITIONS: CMS entries are added before footer. */
 if (fs.existsSync(exhibitionsFile)) {
   let exhibitionsHtml = fs.readFileSync(exhibitionsFile, "utf8");
   const exhibitions = sortByOrder(readCollection(exhibitionsDir));
@@ -321,33 +245,21 @@ if (fs.existsSync(exhibitionsFile)) {
   if (exhibitions.length) {
     const rows = exhibitions.map(item => {
       const target = item.link || item.pdf || "";
-      const wrapperStart = target
-        ? `<a class="cms-exhibition-row" href="${escapeAttr(target)}" target="_blank" rel="noopener">`
-        : `<div class="cms-exhibition-row">`;
-      const wrapperEnd = target ? `</a>` : `</div>`;
-      const image = item.image
-        ? `<div class="cms-exhibition-image"><img src="${escapeAttr(item.image)}" alt="${escapeAttr(item.title || "Exhibition")}"></div>`
-        : "";
-      return `${wrapperStart}<div class="cms-exhibition-year">${escapeHtml(item.year || "")}</div><div><h3>${escapeHtml(item.title || "Exhibition")}</h3><p>${escapeHtml(item.venue || "")}${item.description ? ` · ${escapeHtml(item.description)}` : ""}</p></div>${image}${wrapperEnd}`;
+      const start = target ? `<a class="cms-exhibition-row" href="${escapeAttr(target)}" target="_blank" rel="noopener">` : `<div class="cms-exhibition-row">`;
+      const end = target ? `</a>` : `</div>`;
+      const image = item.image ? `<div class="cms-exhibition-image"><img src="${escapeAttr(item.image)}" alt="${escapeAttr(item.title || "Exhibition")}"></div>` : "";
+      return `${start}<div class="cms-exhibition-year">${escapeHtml(item.year || "")}</div><div><h3>${escapeHtml(item.title || "Exhibition")}</h3><p>${escapeHtml(item.venue || "")}${item.description ? ` · ${escapeHtml(item.description)}` : ""}</p></div>${image}${end}`;
     }).join("");
 
-    const exhibitionBlock = `
-<style data-lacroma-cms-exhibitions>
-.cms-exhibitions{margin-top:78px;border-top:1px solid var(--line)}
-.cms-exhibitions-head{padding:24px 0 18px;font-size:9px;letter-spacing:.17em;color:var(--muted)}
-.cms-exhibition-row{display:grid;grid-template-columns:90px 1fr 220px;gap:30px;align-items:center;padding:28px 0;border-top:1px solid var(--line);color:inherit;text-decoration:none}
-.cms-exhibition-year{font-size:9px;letter-spacing:.14em;color:var(--muted)}
-.cms-exhibition-row h3{font-family:Georgia,serif;font-size:23px;font-weight:400;margin:0 0 8px}
-.cms-exhibition-row p{font-size:9px;letter-spacing:.08em;line-height:1.6;color:var(--muted);margin:0}
-.cms-exhibition-image img{width:100%;max-height:140px;object-fit:contain;display:block}
-@media(max-width:850px){.cms-exhibition-row{grid-template-columns:55px 1fr}.cms-exhibition-image{grid-column:2}}
-</style>
+    const block = `<style data-lacroma-cms-exhibitions>
+.cms-exhibitions{margin-top:78px;border-top:1px solid var(--line)}.cms-exhibitions-head{padding:24px 0 18px;font-size:9px;letter-spacing:.17em;color:var(--muted)}
+.cms-exhibition-row{display:grid;grid-template-columns:90px 1fr 220px;gap:30px;align-items:center;padding:28px 0;border-top:1px solid var(--line);color:inherit;text-decoration:none}.cms-exhibition-year{font-size:9px;letter-spacing:.14em;color:var(--muted)}
+.cms-exhibition-row h3{font-family:Georgia,serif;font-size:23px;font-weight:400;margin:0 0 8px}.cms-exhibition-row p{font-size:9px;letter-spacing:.08em;line-height:1.6;color:var(--muted);margin:0}.cms-exhibition-image img{width:100%;max-height:140px;object-fit:contain;display:block}
+@media(max-width:850px){.cms-exhibition-row{grid-template-columns:55px 1fr}.cms-exhibition-image{grid-column:2}}</style>
 <section class="cms-exhibitions"><div class="cms-exhibitions-head">MORE EXHIBITIONS</div>${rows}</section>`;
-
-    exhibitionsHtml = exhibitionsHtml.replace(/<footer>/i, `${exhibitionBlock}<footer>`);
+    exhibitionsHtml = exhibitionsHtml.replace(/<footer>/i, `${block}<footer>`);
   }
-
   saveHtml(exhibitionsFile, exhibitionsHtml, "exhibitions.html");
 }
 
-console.log("LACROMA: CMS final package build complete");
+console.log("LACROMA: CMS existing-content build complete");

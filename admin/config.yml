@@ -66,9 +66,12 @@ collections:
         label: "About"
         file: "data/about.yml"
         fields:
-          - { label: "Name", name: "name", widget: "string", required: false }
-          - { label: "Text", name: "text", widget: "text", required: false }
-          - { label: "Quote", name: "quote", widget: "text", required: false }
+          - { label: "Name", name: "name", widget: "string" }
+          - { label: "Intro", name: "intro", widget: "text" }
+          - { label: "Drawing", name: "drawing", widget: "text" }
+          - { label: "Quote", name: "quote", widget: "text" }
+          - { label: "Practice", name: "practice", widget: "text" }
+          - { label: "Exhibitions paragraph", name: "exhibitions_text", widget: "text" }
           - { label: "Photo", name: "photo", widget: "image", required: false }
           - { label: "Location", name: "location", widget: "string", required: false }
       - name: "contact"
