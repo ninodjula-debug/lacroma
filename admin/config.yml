@@ -28,32 +28,36 @@ collections:
     folder: "data/exhibitions"
     create: true
     slug: "{{slug}}"
+    summary: "{{order}} · {{title}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
-      - { label: "Existing item title", name: "legacy_title", widget: "string", required: false, hint: "Used only while migrating an exhibition already present on the locked site." }
+      - { label: "Existing item title", name: "legacy_title", widget: "string", required: false, hint: "Internal link to an exhibition already present on the locked site." }
+      - { label: "Hide from site", name: "hidden", widget: "boolean", default: false, required: false }
       - { label: "Year", name: "year", widget: "string", required: false }
       - { label: "Venue / Location", name: "venue", widget: "string", required: false }
       - { label: "Description", name: "description", widget: "text", required: false }
       - { label: "Image", name: "image", widget: "image", required: false }
       - { label: "Link", name: "link", widget: "string", required: false }
       - { label: "PDF / Catalogue", name: "pdf", widget: "file", required: false }
-      - { label: "Order", name: "order", widget: "number", value_type: "int", required: false }
+      - { label: "Order", name: "order", widget: "number", value_type: "int", required: false, hint: "Smaller number appears earlier." }
 
   - name: "press"
     label: "Press"
     folder: "data/press"
     create: true
     slug: "{{slug}}"
+    summary: "{{order}} · {{title}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
-      - { label: "Existing item title", name: "legacy_title", widget: "string", required: false, hint: "Used only while migrating a press item already present on the locked site." }
+      - { label: "Existing item title", name: "legacy_title", widget: "string", required: false, hint: "Internal link to a Press item already present on the locked site." }
+      - { label: "Hide from site", name: "hidden", widget: "boolean", default: false, required: false }
       - { label: "Publication", name: "publication", widget: "string", required: false }
       - { label: "Date / Year", name: "date", widget: "string", required: false }
       - { label: "Description", name: "description", widget: "text", required: false }
       - { label: "Image", name: "image", widget: "image", required: false }
       - { label: "Link", name: "link", widget: "string", required: false }
       - { label: "PDF", name: "pdf", widget: "file", required: false }
-      - { label: "Order", name: "order", widget: "number", value_type: "int", required: false }
+      - { label: "Order", name: "order", widget: "number", value_type: "int", required: false, hint: "Smaller number appears earlier." }
 
   - name: "homepage_images"
     label: "Homepage Images"
@@ -63,7 +67,9 @@ collections:
     summary: "{{order}} · {{title}}"
     fields:
       - { label: "Title", name: "title", widget: "string", required: false }
-      - { label: "Image", name: "image", widget: "image" }
+      - { label: "Image", name: "image", widget: "image", required: false, hint: "Existing homepage images can be reordered or hidden without replacing the image." }
+      - { label: "Existing homepage position", name: "legacy_index", widget: "number", value_type: "int", required: false, hint: "Internal field for images already present on the locked homepage." }
+      - { label: "Hide from homepage", name: "hidden", widget: "boolean", default: false, required: false }
       - { label: "Order", name: "order", widget: "number", value_type: "int", required: false, hint: "Smaller number appears earlier on the homepage." }
       - label: "Category"
         name: "category"
