@@ -1,7 +1,6 @@
 ---
-title: Original LACROMA work
-image: /media/zokim.jpg
+title: "Original LACROMA work"
 legacy_index: 1
-order: 1
-category: Faces
+order: 10
+category: "Faces"
 ---
