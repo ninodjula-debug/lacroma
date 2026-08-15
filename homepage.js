@@ -20,4 +20,7 @@ const managed=[];for(const [idx,it] of [...byLegacy.entries()].sort((a,b)=>a[0]-
 /* Preserve any unmanaged locked thumbnails as a safety fallback. */
 for(const i of unused)managed.push({order:(i+1)*10,markup:legacy[i]});
 const added=fresh.map((it,i)=>({order:Number(it.order||((legacy.length+i+1)*10)),markup:`<a class="thumb" data-homepage-cms="1" data-cat="${esc((it.category||'').toLowerCase())}" href="${esc(it.image)}"><img alt="${esc(it.title||'LACROMA artwork')}" src="${esc(it.image)}" loading="lazy"></a>`}));
-const rebuilt=[...managed,...added].sort((a,b)=>a.order-b.order).map(x=>x.markup).join('');html=html.replace(gridRe,`<section class="grid">${rebuilt}</section>`);fs.writeFileSync(file,html,'utf8');console.log(`LACROMA: managed ${managed.length} existing + ${added.length} homepage CMS images`);
+const rebuilt=[...managed,...added].sort((a,b)=>a.order-b.order).map(x=>x.markup).join('');html=html.replace(gridRe,`<section class="grid">${rebuilt}</section>`);
+/* Gallery pagination: Home and every category show up to 16 works before MORE appears. */
+html=html.replace(/let\s+initialShown\s*=\s*\d+\s*;/g,'let initialShown = 16;').replace(/const\s+initialShown\s*=\s*\d+\s*;/g,'const initialShown = 16;');
+fs.writeFileSync(file,html,'utf8');console.log(`LACROMA: managed ${managed.length} existing + ${added.length} homepage CMS images; first 16 works visible before MORE`);
