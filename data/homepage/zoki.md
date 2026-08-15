@@ -1,6 +1,6 @@
 ---
-title: Zoki
 image: /media/zokim.jpg
-order: 110
+order: 10
 category: Faces
+title: Zoki
 ---
