@@ -1,2 +1,2 @@
 [build]
-command = "node build.js && node homepage.js"
+command = "node build.js && node homepage.js && node seo-inject.js"
