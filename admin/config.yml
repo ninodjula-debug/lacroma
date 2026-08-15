@@ -22,6 +22,37 @@ collections:
       - { label: "Year", name: "year", widget: "string", required: false }
       - { label: "Location", name: "location", widget: "string", required: false }
       - { label: "Order", name: "order", widget: "number", value_type: "int", required: false }
+
+  - name: "exhibitions"
+    label: "Exhibitions"
+    folder: "data/exhibitions"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Year", name: "year", widget: "string", required: false }
+      - { label: "Venue / Location", name: "venue", widget: "string", required: false }
+      - { label: "Description", name: "description", widget: "text", required: false }
+      - { label: "Image", name: "image", widget: "image", required: false }
+      - { label: "Link", name: "link", widget: "string", required: false }
+      - { label: "PDF / Catalogue", name: "pdf", widget: "file", required: false }
+      - { label: "Order", name: "order", widget: "number", value_type: "int", required: false }
+
+  - name: "press"
+    label: "Press"
+    folder: "data/press"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Publication", name: "publication", widget: "string", required: false }
+      - { label: "Date / Year", name: "date", widget: "string", required: false }
+      - { label: "Description", name: "description", widget: "text", required: false }
+      - { label: "Image", name: "image", widget: "image", required: false }
+      - { label: "Link", name: "link", widget: "string", required: false }
+      - { label: "PDF", name: "pdf", widget: "file", required: false }
+      - { label: "Order", name: "order", widget: "number", value_type: "int", required: false }
+
   - name: "site"
     label: "Site"
     files:
@@ -31,3 +62,21 @@ collections:
         fields:
           - { label: "Hero image", name: "hero_image", widget: "image" }
           - { label: "Home text", name: "home_text", widget: "text", required: false }
+      - name: "about"
+        label: "About"
+        file: "data/about.yml"
+        fields:
+          - { label: "Name", name: "name", widget: "string", required: false }
+          - { label: "Text", name: "text", widget: "text", required: false }
+          - { label: "Quote", name: "quote", widget: "text", required: false }
+          - { label: "Photo", name: "photo", widget: "image", required: false }
+          - { label: "Location", name: "location", widget: "string", required: false }
+      - name: "contact"
+        label: "Contact"
+        file: "data/contact.yml"
+        fields:
+          - { label: "Heading", name: "heading", widget: "string", required: false }
+          - { label: "Instagram label", name: "instagram_label", widget: "string", required: false }
+          - { label: "Instagram URL", name: "instagram_url", widget: "string", required: false }
+          - { label: "Email", name: "email", widget: "string", required: false }
+          - { label: "Location", name: "location", widget: "string", required: false }
