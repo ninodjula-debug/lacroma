@@ -22,3 +22,12 @@ collections:
       - { label: "Year", name: "year", widget: "string", required: false }
       - { label: "Location", name: "location", widget: "string", required: false }
       - { label: "Order", name: "order", widget: "number", value_type: "int", required: false }
+  - name: "site"
+    label: "Site"
+    files:
+      - name: "home"
+        label: "Home"
+        file: "data/home.yml"
+        fields:
+          - { label: "Hero image", name: "hero_image", widget: "image" }
+          - { label: "Home text", name: "home_text", widget: "text", required: false }
