@@ -55,6 +55,22 @@ collections:
       - { label: "PDF", name: "pdf", widget: "file", required: false }
       - { label: "Order", name: "order", widget: "number", value_type: "int", required: false }
 
+  - name: "homepage_images"
+    label: "Homepage Images"
+    folder: "data/homepage"
+    create: true
+    slug: "{{slug}}"
+    summary: "{{order}} · {{title}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string", required: false }
+      - { label: "Image", name: "image", widget: "image" }
+      - { label: "Order", name: "order", widget: "number", value_type: "int", required: false, hint: "Smaller number appears earlier on the homepage." }
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        required: false
+        options: ["Places", "Faces", "Notes", "Objects"]
+
   - name: "site"
     label: "Site"
     files:
