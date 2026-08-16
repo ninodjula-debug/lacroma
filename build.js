@@ -5,6 +5,7 @@ const worksDir = path.join(__dirname, "data", "works");
 const exhibitionsDir = path.join(__dirname, "data", "exhibitions");
 const pressDir = path.join(__dirname, "data", "press");
 const outputFile = path.join(__dirname, "works.json");
+const legacyInventoryFile = path.join(__dirname, "legacy-works.json");
 const indexFile = path.join(__dirname, "index.html");
 const exhibitionsFile = path.join(__dirname, "exhibitions.html");
 const pressFile = path.join(__dirname, "press.html");
@@ -19,6 +20,7 @@ function escapeHtml(value = "") { return String(value).replace(/&/g,"&amp;").rep
 function escapeAttr(value = "") { return escapeHtml(value).replace(/'/g,"&#39;"); }
 function renderInline(value = "") { return escapeHtml(value).replace(/\*([^*]+)\*/g,"<em>$1</em>"); }
 function regexEscape(value = "") { return String(value).replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); }
+function truthy(value) { return /^(true|1|yes|on)$/i.test(String(value || "")); }
 
 function parseYamlLike(text = "") {
   const out = {};
@@ -49,7 +51,7 @@ function sortByOrder(items) { return items.sort((a,b)=>Number(a.order??999999)-N
 function saveHtml(file,html,label) { fs.writeFileSync(file,html,"utf8"); console.log(`LACROMA: updated ${label}`); }
 function injectBeforeBody(html,addition) { if(!addition||html.includes("data-lacroma-cms-package")) return html; return html.replace(/<\/body>/i,`${addition}\n</body>`); }
 
-const works=sortByOrder(readCollection(worksDir).filter(w=>w.image&&w.category));
+const works=sortByOrder(readCollection(worksDir).filter(w=>(w.image&&w.category)||w.legacy_index));
 fs.writeFileSync(outputFile,JSON.stringify(works,null,2),"utf8");
 console.log(`LACROMA: generated ${works.length} works → works.json`);
 
@@ -59,12 +61,60 @@ let html=fs.readFileSync(indexFile,"utf8");
 const home=readYamlLike(homeFile);
 if(home.hero_image) html=html.replace(/(<section class=["']hero["'][^>]*>\s*<img\b[^>]*\bsrc=["'])[^"']*(["'])/i,(m,a,b)=>`${a}${escapeAttr(home.hero_image)}${b}`);
 if(home.home_text) html=html.replace(/(<div class=["']statement["'][^>]*>)[\s\S]*?(<\/div>)/i,(m,a,b)=>`${a}${escapeHtml(home.home_text)}${b}`);
+
 const gridRegex=/<section class=["']grid["']>([\s\S]*?)<\/section>/i;
 const gridMatch=html.match(gridRegex);
 if(!gridMatch) throw new Error("LACROMA: gallery grid not found — index.html left unchanged");
 const existingGrid=gridMatch[1];
-const cmsMarkup=works.filter(w=>!existingGrid.includes(w.image)).map(w=>`<a class="thumb" data-cat="${escapeAttr((w.category||"").toLowerCase())}" data-cms-work="1" href="${escapeAttr(w.image)}"><img alt="${escapeAttr(w.title||"LACROMA artwork")}" src="${escapeAttr(w.image)}" loading="lazy"></a>`).join("");
-html=html.replace(gridRegex,`<section class="grid">${existingGrid}${cmsMarkup}</section>`);
+
+const thumbRegex=/<a\b[^>]*class=["'][^"']*\bthumb\b[^"']*["'][^>]*>[\s\S]*?<\/a>/gi;
+const originalThumbs=existingGrid.match(thumbRegex) || [];
+const inventory=originalThumbs.map((block,index)=>{
+  const cat=(block.match(/\bdata-cat=["']([^"']*)["']/i)||[])[1]||"";
+  const img=(block.match(/<img\b[^>]*\bsrc=["']([^"']*)["']/i)||[])[1]||"";
+  const alt=(block.match(/<img\b[^>]*\balt=["']([^"']*)["']/i)||[])[1]||"";
+  return {legacy_index:index+1,category:cat,alt,embedded_image:/^data:/i.test(img),image:/^data:/i.test(img)?"":img};
+});
+fs.writeFileSync(legacyInventoryFile,JSON.stringify(inventory,null,2),"utf8");
+console.log(`LACROMA: indexed ${inventory.length} locked gallery works → legacy-works.json`);
+
+const legacyOverrides=new Map();
+const freshWorks=[];
+for(const work of works){
+  const legacyIndex=Number(work.legacy_index||0);
+  if(legacyIndex>0) legacyOverrides.set(legacyIndex,work);
+  else if(work.image&&work.category&&!truthy(work.hidden)) freshWorks.push(work);
+}
+
+const managedLegacy=originalThumbs.map((block,index)=>{
+  const position=index+1;
+  const work=legacyOverrides.get(position);
+  if(!work) return {order:position,markup:block};
+  if(truthy(work.hidden)) return null;
+  let updated=block;
+  if(work.image){
+    updated=updated.replace(/(\bhref=["'])[^"']*(["'])/i,`$1${escapeAttr(work.image)}$2`);
+    updated=updated.replace(/(<img\b[^>]*\bsrc=["'])[^"']*(["'])/i,`$1${escapeAttr(work.image)}$2`);
+  }
+  if(work.title){
+    if(/<img\b[^>]*\balt=/i.test(updated)) updated=updated.replace(/(<img\b[^>]*\balt=["'])[^"']*(["'])/i,`$1${escapeAttr(work.title)}$2`);
+    else updated=updated.replace(/<img\b/i,`<img alt="${escapeAttr(work.title)}"`);
+  }
+  if(work.category){
+    if(/\bdata-cat=/i.test(updated)) updated=updated.replace(/(\bdata-cat=["'])[^"']*(["'])/i,`$1${escapeAttr(work.category.toLowerCase())}$2`);
+    else updated=updated.replace(/<a\b/i,`<a data-cat="${escapeAttr(work.category.toLowerCase())}"`);
+  }
+  if(!/\bdata-cms-legacy=/i.test(updated)) updated=updated.replace(/<a\b/i,'<a data-cms-legacy="1"');
+  return {order:Number(work.order||position),markup:updated};
+}).filter(Boolean);
+
+const freshManaged=freshWorks.map((work,index)=>({
+  order:Number(work.order||(originalThumbs.length+index+1)),
+  markup:`<a class="thumb" data-cat="${escapeAttr((work.category||"").toLowerCase())}" data-cms-work="1" href="${escapeAttr(work.image)}"><img alt="${escapeAttr(work.title||"LACROMA artwork")}" src="${escapeAttr(work.image)}" loading="lazy"></a>`
+}));
+
+const rebuiltGrid=[...managedLegacy,...freshManaged].sort((a,b)=>a.order-b.order).map(item=>item.markup).join("");
+html=html.replace(gridRegex,`<section class="grid">${rebuiltGrid}</section>`);
 const galleryEnhancement=`
 <style data-lacroma-cms-package>.caption{display:none!important}.thumb span{display:none!important}.thumb{cursor:zoom-in}.lacroma-lightbox{position:fixed;inset:0;z-index:9999;background:rgba(250,249,246,.97);display:none;align-items:center;justify-content:center;padding:28px}.lacroma-lightbox.open{display:flex}.lacroma-lightbox img{max-width:94vw;max-height:90vh;width:auto;height:auto;object-fit:contain}.lacroma-lightbox button{position:fixed;top:24px;right:28px;border:0;background:transparent;color:#1C1C1A;font:300 28px/1 Arial,sans-serif;cursor:pointer;padding:8px}@media(max-width:850px){.lacroma-lightbox{padding:16px}.lacroma-lightbox button{top:12px;right:12px}}</style>
 <div class="lacroma-lightbox" id="lacroma-lightbox" aria-hidden="true"><button type="button" aria-label="Close">×</button><img alt=""></div>
@@ -102,7 +152,7 @@ function updateLegacyPress(page,item){
   if(item.link||item.pdf) block=block.replace(/href=["'][^"']*["']/i,`href="${escapeAttr(item.link||item.pdf)}"`);
   if(item.image) block=block.replace(/(<img\b[^>]*\bsrc=["'])[^"']*(["'])/i,`$1${escapeAttr(item.image)}$2`);
   if(item.publication||item.date){const meta=[item.publication,item.date].filter(Boolean).map(escapeHtml).join(" · ");block=block.replace(/(<div class=["']meta["']>)[\s\S]*?(<\/div>)/i,`$1${meta}$2`);}
-  if(item.description){ if(/<p\b/i.test(block)) block=block.replace(/(<p\b[^>]*>)[\s\S]*?(<\/p>)/i,`$1${escapeHtml(item.description)}$2`); else block=block.replace(/(<span\b[^>]*>)[\s\S]*?(<\/span>)/i,`$1${escapeHtml(item.description)}$2`); }
+  if(item.description){if(/<p\b/i.test(block)) block=block.replace(/(<p\b[^>]*>)[\s\S]*?(<\/p>)/i,`$1${escapeHtml(item.description)}$2`);else block=block.replace(/(<span\b[^>]*>)[\s\S]*?(<\/span>)/i,`$1${escapeHtml(item.description)}$2`);}
   return page.replace(blockRe,block);
 }
 
@@ -119,7 +169,7 @@ function updateLegacyExhibition(page,item){
   return page.replace(blockRe,block);
 }
 
-/* PRESS: legacy CMS records update existing locked markup; new records append. */
+/* PRESS */
 if(fs.existsSync(pressFile)){
   let phtml=fs.readFileSync(pressFile,"utf8"); const items=sortByOrder(readCollection(pressDir));
   items.filter(i=>i.legacy_title).forEach(i=>{phtml=updateLegacyPress(phtml,i);});
@@ -128,7 +178,7 @@ if(fs.existsSync(pressFile)){
   saveHtml(pressFile,phtml,"press.html");
 }
 
-/* EXHIBITIONS: legacy CMS records update existing locked markup; new records append. */
+/* EXHIBITIONS */
 if(fs.existsSync(exhibitionsFile)){
   let ehtml=fs.readFileSync(exhibitionsFile,"utf8"); const items=sortByOrder(readCollection(exhibitionsDir));
   items.filter(i=>i.legacy_title).forEach(i=>{ehtml=updateLegacyExhibition(ehtml,i);});
