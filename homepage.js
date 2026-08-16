@@ -20,15 +20,16 @@ const added=fresh.map((it,i)=>({order:Number(it.order||((legacy.length+i+1)*10))
 /* A work can be represented in Works and Homepage Images at the same time. Keep only one visible card per physical image. */
 const seen=new Set();const rebuiltItems=[...managed,...added].sort((a,b)=>a.order-b.order).filter(x=>{const key=imageKey(x.markup);if(!key)return true;if(seen.has(key))return false;seen.add(key);return true;});
 const rebuilt=rebuiltItems.map(x=>x.markup).join('');html=html.replace(gridRe,`<section class="grid">${rebuilt}</section>`);
-/* Best-effort source removal; runtime removal below catches nested spans/icons too. */
+/* Best-effort source removal; runtime removal below catches decorative wrappers too. */
 html=html.replace(/<(a|button)\b[^>]*>\s*VIEW\s+ALL\s+WORKS\s*<\/\1>/gi,'');
 /* Ensure the pagination control exists even if an earlier build/source revision omitted it. */
 if(!/id=["']worksMore["']/i.test(html))html=html.replace(/<\/section>/i,`</section><div class="more" id="worksMore"><button type="button">MORE</button></div>`);
 const oldGalleryLogic=/const buttons=\[\.\.\.document\.querySelectorAll\('\.filters button'\)\];[\s\S]*?moreBtn\.addEventListener\('click',\(\)=>\{cards\.forEach\(c=>c\.classList\.remove\('more-hidden'\)\);moreWrap\.style\.display='none';\}\);\s*\}/;
 const newGalleryLogic=`const buttons=[...document.querySelectorAll('.filters button')];
 const cards=[...document.querySelectorAll('.thumb')];
-/* Remove obsolete VIEW ALL WORKS regardless of nested spans/icons or whitespace. */
-document.querySelectorAll('a,button').forEach(el=>{const label=(el.textContent||'').replace(/\s+/g,' ').trim().toUpperCase();if(label==='VIEW ALL WORKS')el.remove();});
+/* Remove the obsolete decorative VIEW ALL WORKS label, whatever element contains it. */
+const viewAllLabel=el=>(el.textContent||'').replace(/\\s+/g,' ').trim();
+[...document.querySelectorAll('body *')].filter(el=>/^VIEW ALL WORKS\\b/i.test(viewAllLabel(el))&&![...el.children].some(ch=>/^VIEW ALL WORKS\\b/i.test(viewAllLabel(ch)))).forEach(el=>{let target=el;const parent=el.parentElement;if(parent&&parent!==document.body&&!parent.matches('.grid,.filters,#worksMore')&&/^VIEW ALL WORKS\\b/i.test(viewAllLabel(parent))&&viewAllLabel(parent).length<40&&parent.children.length<=3)target=parent;target.remove();});
 const moreWrap=document.getElementById('worksMore');
 const moreBtn=moreWrap?moreWrap.querySelector('button'):null;
 const LIMIT=16;
@@ -48,4 +49,4 @@ if(moreBtn)moreBtn.addEventListener('click',()=>{expanded=true;renderWorks();});
 renderWorks();`;
 if(!oldGalleryLogic.test(html))throw new Error('LACROMA homepage helper: expected gallery pagination block not found — index.html left unchanged');
 html=html.replace(oldGalleryLogic,newGalleryLogic);
-fs.writeFileSync(file,html,'utf8');console.log(`LACROMA: ${rebuiltItems.length} unique homepage cards; duplicates removed; 16 visible per active view before MORE; VIEW ALL WORKS removed`);
+fs.writeFileSync(file,html,'utf8');console.log(`LACROMA: ${rebuiltItems.length} unique homepage cards; duplicates removed; 16 visible per active view before MORE; decorative VIEW ALL WORKS removed`);
