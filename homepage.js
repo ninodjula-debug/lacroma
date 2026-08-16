@@ -7,10 +7,9 @@ function parse(t=''){const o={};for(const line of t.replace(/\r/g,'').split('\n'
 function items(){if(!fs.existsSync(dir))return[];return fs.readdirSync(dir).filter(f=>/\.(md|ya?ml)$/i.test(f)&&!f.startsWith('.')).map(f=>{const t=fs.readFileSync(path.join(dir,f),'utf8');const fm=t.startsWith('---')?(t.split(/^---\s*$/m).slice(1,2)[0]||''):t;return parse(fm);});}
 if(!fs.existsSync(file))throw new Error('LACROMA homepage helper: index.html not found');
 let html=fs.readFileSync(file,'utf8');const gridRe=/<section class=["']grid["']>([\s\S]*?)<\/section>/i,m=html.match(gridRe);if(!m)throw new Error('LACROMA homepage helper: gallery grid not found');
-/* Homepage Images is the sole source of editable homepage additions. Remove transient cards appended by Works and previous homepage builds before rebuilding. */
+/* Rebuild Homepage Images entries, but preserve Works cards already added by build.js. */
 const raw=m[1]
- .replace(/<a\b[^>]*data-homepage-cms=["']1["'][\s\S]*?<\/a>/gi,'')
- .replace(/<a\b[^>]*data-cms-work=["']1["'][\s\S]*?<\/a>/gi,'');
+ .replace(/<a\b[^>]*data-homepage-cms=["']1["'][\s\S]*?<\/a>/gi,'');
 const thumbRe=/<a\b[^>]*class=["'][^"']*\bthumb\b[^"']*["'][^>]*>[\s\S]*?<\/a>/gi,legacy=raw.match(thumbRe)||[];
 const controls=items(),byLegacy=new Map(),fresh=[];for(const it of controls){const n=Number(it.legacy_index||0);if(n>0)byLegacy.set(n,it);else if(it.image&&!truthy(it.hidden))fresh.push(it);}
 /* A previous preview build may already have reordered the locked thumbnails. Match managed legacy items by their current image path first, not by their current DOM position. This keeps order changes stable across repeated Netlify builds. */
@@ -55,4 +54,4 @@ if(moreBtn)moreBtn.addEventListener('click',()=>{expanded=true;renderWorks();});
 renderWorks();`;
 if(!oldGalleryLogic.test(html))throw new Error('LACROMA homepage helper: expected gallery pagination block not found — index.html left unchanged');
 html=html.replace(oldGalleryLogic,newGalleryLogic);
-fs.writeFileSync(file,html,'utf8');console.log(`LACROMA: managed ${managed.length} existing + ${added.length} homepage CMS images; 16 works visible per active view before MORE`);
+fs.writeFileSync(file,html,'utf8');console.log(`LACROMA: managed ${managed.length} existing + ${added.length} homepage CMS images; Works cards preserved; 16 works visible per active view before MORE`);
