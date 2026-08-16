@@ -19,6 +19,18 @@ function escapeHtml(value = "") { return String(value).replace(/&/g,"&amp;").rep
 function escapeAttr(value = "") { return escapeHtml(value).replace(/'/g,"&#39;"); }
 function renderInline(value = "") { return escapeHtml(value).replace(/\*([^*]+)\*/g,"<em>$1</em>"); }
 function regexEscape(value = "") { return String(value).replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); }
+function applyBrandMeta(page) {
+  const title = "LACROMA — Nino Đula";
+  const description = "Selected works by Nino Đula. Drawings, exhibitions and press.";
+  const favicon = `<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23FAF9F6'/%3E%3Cpath d='M21 13V49H47' fill='none' stroke='%231C1C1A' stroke-width='3' stroke-linecap='square'/%3E%3C/svg%3E">`;
+  page = page.replace(/<title>[\s\S]*?<\/title>/i, `<title>${title}</title>`);
+  page = page.replace(/\s*<meta\s+name=["']description["'][^>]*>/ig, "");
+  page = page.replace(/\s*<meta\s+property=["']og:(?:title|description|url|type)["'][^>]*>/ig, "");
+  page = page.replace(/\s*<meta\s+name=["']twitter:(?:card|title|description)["'][^>]*>/ig, "");
+  page = page.replace(/\s*<link\s+rel=["'](?:shortcut )?icon["'][^>]*>/ig, "");
+  const meta = `\n<meta name="description" content="${description}">\n<meta property="og:title" content="${title}">\n<meta property="og:description" content="${description}">\n<meta property="og:url" content="https://lacroma.art/">\n<meta property="og:type" content="website">\n<meta name="twitter:card" content="summary">\n<meta name="twitter:title" content="${title}">\n<meta name="twitter:description" content="${description}">\n${favicon}`;
+  return page.replace(/<\/head>/i, `${meta}\n</head>`);
+}
 
 function parseYamlLike(text = "") {
   const out = {};
@@ -46,7 +58,7 @@ function readCollection(dir) {
   });
 }
 function sortByOrder(items) { return items.sort((a,b)=>Number(a.order??999999)-Number(b.order??999999)); }
-function saveHtml(file,html,label) { fs.writeFileSync(file,html,"utf8"); console.log(`LACROMA: updated ${label}`); }
+function saveHtml(file,html,label) { fs.writeFileSync(file,applyBrandMeta(html),"utf8"); console.log(`LACROMA: updated ${label}`); }
 function injectBeforeBody(html,addition) { if(!addition||html.includes("data-lacroma-cms-package")) return html; return html.replace(/<\/body>/i,`${addition}\n</body>`); }
 
 const works=sortByOrder(readCollection(worksDir).filter(w=>w.image&&w.category));
