@@ -64,8 +64,9 @@ collections:
     folder: "data/homepage"
     create: true
     slug: "{{slug}}"
-    summary: "{{order}} · {{category}}"
+    summary: "{{order}} · {{title}}"
     fields:
+      - { label: "Internal name", name: "title", widget: "string", hint: "Required only so the CMS can save the item. Use any short unique name, e.g. dubrovnik-1." }
       - { label: "Image", name: "image", widget: "image", hint: "Choose the artwork shown on the homepage." }
       - { label: "Order", name: "order", widget: "number", value_type: "int", required: false, hint: "Smaller number appears earlier. Use 10, 20, 30..." }
       - { label: "Hide from homepage", name: "hidden", widget: "boolean", default: false, required: false }
@@ -74,7 +75,6 @@ collections:
         widget: "select"
         required: false
         options: ["Places", "Faces", "Notes", "Objects"]
-      - { label: "Title / alt text", name: "title", widget: "string", required: false, hint: "Optional." }
       - { label: "Internal homepage position", name: "legacy_index", widget: "hidden", required: false }
 
   - name: "site"
