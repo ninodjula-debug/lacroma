@@ -20,13 +20,15 @@ const added=fresh.map((it,i)=>({order:Number(it.order||((legacy.length+i+1)*10))
 /* A work can be represented in Works and Homepage Images at the same time. Keep only one visible card per physical image. */
 const seen=new Set();const rebuiltItems=[...managed,...added].sort((a,b)=>a.order-b.order).filter(x=>{const key=imageKey(x.markup);if(!key)return true;if(seen.has(key))return false;seen.add(key);return true;});
 const rebuilt=rebuiltItems.map(x=>x.markup).join('');html=html.replace(gridRe,`<section class="grid">${rebuilt}</section>`);
-/* Remove the obsolete VIEW ALL WORKS control only; MORE remains managed below. */
+/* Best-effort source removal; runtime removal below catches nested spans/icons too. */
 html=html.replace(/<(a|button)\b[^>]*>\s*VIEW\s+ALL\s+WORKS\s*<\/\1>/gi,'');
 /* Ensure the pagination control exists even if an earlier build/source revision omitted it. */
 if(!/id=["']worksMore["']/i.test(html))html=html.replace(/<\/section>/i,`</section><div class="more" id="worksMore"><button type="button">MORE</button></div>`);
 const oldGalleryLogic=/const buttons=\[\.\.\.document\.querySelectorAll\('\.filters button'\)\];[\s\S]*?moreBtn\.addEventListener\('click',\(\)=>\{cards\.forEach\(c=>c\.classList\.remove\('more-hidden'\)\);moreWrap\.style\.display='none';\}\);\s*\}/;
 const newGalleryLogic=`const buttons=[...document.querySelectorAll('.filters button')];
 const cards=[...document.querySelectorAll('.thumb')];
+/* Remove obsolete VIEW ALL WORKS regardless of nested spans/icons or whitespace. */
+document.querySelectorAll('a,button').forEach(el=>{const label=(el.textContent||'').replace(/\s+/g,' ').trim().toUpperCase();if(label==='VIEW ALL WORKS')el.remove();});
 const moreWrap=document.getElementById('worksMore');
 const moreBtn=moreWrap?moreWrap.querySelector('button'):null;
 const LIMIT=16;
