@@ -1,6 +1,6 @@
 ---
-title: mladić
-image: /media/mladić-na-peskariji.jpg
+title: losos
+image: /media/losos-dbk.jpg
 hidden: false
 category: Places
 ---
