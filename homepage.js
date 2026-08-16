@@ -28,7 +28,8 @@ const cards=[...document.querySelectorAll('.thumb')];
 const moreWrap=document.getElementById('worksMore');
 const moreBtn=moreWrap?moreWrap.querySelector('button'):null;
 const LIMIT=16;
-let active='all',expanded=false;
+const allowed=['places','faces','notes','objects'];
+let active=allowed.includes(location.hash.slice(1).toLowerCase())?location.hash.slice(1).toLowerCase():'all',expanded=false;
 function renderWorks(){
   const eligible=cards.filter(card=>active==='all'||card.dataset.cat===active);
   cards.forEach(card=>{
@@ -37,14 +38,19 @@ function renderWorks(){
   });
   if(!expanded)eligible.slice(LIMIT).forEach(card=>card.classList.add('more-hidden'));
   if(moreWrap)moreWrap.style.display=eligible.length>LIMIT&&!expanded?'block':'none';
+  buttons.forEach(btn=>btn.classList.toggle('active',(btn.dataset.filter||'all')===active));
 }
-buttons.forEach(btn=>btn.addEventListener('click',()=>{
-  buttons.forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  active=btn.dataset.filter||'all';
+function setCategory(next,writeHash=true){
+  active=allowed.includes(next)?next:'all';
   expanded=false;
+  if(writeHash){
+    const target=active==='all'?'':('#'+active);
+    if(location.hash!==target)history.replaceState(null,'',location.pathname+location.search+target);
+  }
   renderWorks();
-}));
+}
+buttons.forEach(btn=>btn.addEventListener('click',()=>setCategory(btn.dataset.filter||'all')));
+window.addEventListener('hashchange',()=>setCategory(location.hash.slice(1).toLowerCase(),false));
 if(moreBtn)moreBtn.addEventListener('click',()=>{expanded=true;renderWorks();});
 renderWorks();`;
 if(!oldGalleryLogic.test(html))throw new Error('LACROMA homepage helper: expected gallery pagination block not found — index.html left unchanged');
