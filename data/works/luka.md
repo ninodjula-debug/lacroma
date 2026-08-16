@@ -1,5 +1,5 @@
 ---
-title: luka
-image: /media/luka.jpg
+title: oliver
+image: /media/img_8044.jpeg
 category: Faces
 ---
