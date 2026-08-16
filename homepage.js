@@ -20,6 +20,8 @@ const added=fresh.map((it,i)=>({order:Number(it.order||((legacy.length+i+1)*10))
 /* A work can be represented in Works and Homepage Images at the same time. Keep only one visible card per physical image. */
 const seen=new Set();const rebuiltItems=[...managed,...added].sort((a,b)=>a.order-b.order).filter(x=>{const key=imageKey(x.markup);if(!key)return true;if(seen.has(key))return false;seen.add(key);return true;});
 const rebuilt=rebuiltItems.map(x=>x.markup).join('');html=html.replace(gridRe,`<section class="grid">${rebuilt}</section>`);
+/* Remove the obsolete VIEW ALL WORKS control only; MORE remains managed below. */
+html=html.replace(/<(a|button)\b[^>]*>\s*VIEW\s+ALL\s+WORKS\s*<\/\1>/gi,'');
 /* Ensure the pagination control exists even if an earlier build/source revision omitted it. */
 if(!/id=["']worksMore["']/i.test(html))html=html.replace(/<\/section>/i,`</section><div class="more" id="worksMore"><button type="button">MORE</button></div>`);
 const oldGalleryLogic=/const buttons=\[\.\.\.document\.querySelectorAll\('\.filters button'\)\];[\s\S]*?moreBtn\.addEventListener\('click',\(\)=>\{cards\.forEach\(c=>c\.classList\.remove\('more-hidden'\)\);moreWrap\.style\.display='none';\}\);\s*\}/;
@@ -44,4 +46,4 @@ if(moreBtn)moreBtn.addEventListener('click',()=>{expanded=true;renderWorks();});
 renderWorks();`;
 if(!oldGalleryLogic.test(html))throw new Error('LACROMA homepage helper: expected gallery pagination block not found — index.html left unchanged');
 html=html.replace(oldGalleryLogic,newGalleryLogic);
-fs.writeFileSync(file,html,'utf8');console.log(`LACROMA: ${rebuiltItems.length} unique homepage cards; duplicates removed; 16 visible per active view before MORE`);
+fs.writeFileSync(file,html,'utf8');console.log(`LACROMA: ${rebuiltItems.length} unique homepage cards; duplicates removed; 16 visible per active view before MORE; VIEW ALL WORKS removed`);
